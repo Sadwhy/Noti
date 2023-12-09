@@ -32,11 +32,13 @@ jobs:
           echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
           echo "COMMIT_ID=${GITHUB_SHA}" >> $GITHUB_ENV
 
-    - name: Discord notification
-      env:       
-       DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-       DISCORD_USERNAME: Test 
-      uses: Ilshidur/action-discord@master
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.0.0
       with:
-       args: 'The project {{ EVENT_PAYLOAD.repository.full_name }} has been deployed.'
-       
+          name: Dantotsu
+          path: "app/build/outputs/apk/debug/app-debug.apk"   
+          
+    - name: Upload the APK to Discord
+      shell: bash
+      run: |
+          curl -F "debug=@app/build/outputs/apk/debug/app-debug.apk" ${{ secrets.DISCORD_WEBHOOK }}
