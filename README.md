@@ -6,7 +6,7 @@
 
 + Noti lets you track progress directly from your status bar.
 + With a customizable progress bar or progress circle.
-+ Adjust the progress circle to fit your phone's hole punch camera.
++ Adjust the progress circle to fit your phone's hole punch camera
 
 ## License
 
