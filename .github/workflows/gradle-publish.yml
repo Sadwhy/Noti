@@ -1,31 +1,43 @@
-name: build
+name: Build APK and Notify Discord
 
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  build:
+  build-and-notify:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup JDK 17
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'zulu'
-        java-version: 17
+      - name: Setup Android SDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
 
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
+      - name: Grant execute permissions to gradlew
+        run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+      - name: Build APK
+        run: ./gradlew assembleRelease
 
-    - name: Compress APK
-      run: zip -r app-debug.zip app/build/outputs/apk/debug/app-debug.apk
+      - name: Get latest commit message and ID
+        id: get_commit_info
+        run: |
+          echo "COMMIT_MESSAGE=$(git log -1 --pretty=%B)" >> $GITHUB_ENV
+          echo "COMMIT_ID=${GITHUB_SHA}" >> $GITHUB_ENV
 
-    - uses: actions/upload-artifact@v3
-      with:
-        name: app-debug.zip
-        path: app-debug.zip
+      - name: Send Discord notification
+        uses: dawidd6/action-discord@v2
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          username: "Pre-Build Builder"
+          avatar_url: "https://media.discordapp.net/attachments/1066717089118814258/1183076684770054248/Xt6r8d0v.png?ex=65870506&is=65749006&hm=ce4090a900734cc623540a0a63a0f01844c9d54a0b33683fccb8587d408ca73b&"
+          content: |
+            **New APK build available!**
+
+            * **Commit ID:** ${{ steps.get_commit_info.outputs.COMMIT_ID }}
+            * **Commit message:** ${{ steps.get_commit_info.outputs.COMMIT_MESSAGE }}
+            * **Download:** https://github.com/${{ github.repository }}/releases/latest/download/app-release.apk
+            
