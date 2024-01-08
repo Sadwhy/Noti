@@ -27,7 +27,9 @@ android {
         }
 
         debug {
-            applicationIdSuffix ".dogfood"
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     compileOptions {
